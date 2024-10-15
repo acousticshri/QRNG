@@ -102,7 +102,8 @@ class QRNG_GUI(tk.Tk):
         tk.Button(self.file_input_tab, text="Preview", command=self.run_preview).pack(pady=5)
 
         # Add the progress bar here
-        self.progress.pack(pady=10)  # Pack the progress bar with padding
+        #self.progress.config(mode='indeterminate')  # Set indeterminate mode
+        #self.progress.pack(pady=10)  # Pack the progress bar with padding
 
         self.preview_text = tk.Text(self.file_input_tab, height=30, width=90)
         self.preview_text.pack(pady=10)
@@ -151,8 +152,7 @@ class QRNG_GUI(tk.Tk):
             messagebox.showerror("Error", "No files loaded! Please load files first.")
             return
 
-        self.progress['value'] = 0
-        self.progress.config(mode='determinate', maximum=100)  # Set determinate mode with 100% scale
+        self.progress.start(10)  # Start the buffering circle
         threading.Thread(target=self.preview_file).start()
 
     def preview_file(self):
@@ -184,7 +184,7 @@ class QRNG_GUI(tk.Tk):
         except Exception as e:
             messagebox.showerror("Error", f"Could not preview files: {str(e)}")
         finally:
-            self.progress['value'] = 100  # Ensure the progress bar completes to 100%
+            self.progress.stop()  # Stop the buffering circle after preview completes
 
     # Run the selected test with progress bar
     def run_test(self):
@@ -192,8 +192,7 @@ class QRNG_GUI(tk.Tk):
             messagebox.showerror("Error", "No files loaded! Please load files first.")
             return
 
-        self.progress['value'] = 0
-        self.progress.config(mode='determinate', maximum=100)  # Set determinate mode with 100% scale
+        self.progress.start(10)  # Start the buffering circle
         threading.Thread(target=self.execute_test).start()
 
     def execute_test(self):
@@ -251,9 +250,7 @@ class QRNG_GUI(tk.Tk):
         except Exception as e:
             messagebox.showerror("Error", f"Error during test execution: {str(e)}")
         finally:
-            self.progress['value'] = 100  # Ensure the progress bar completes to 100%
-
-
+            self.progress.stop()  # Stop the buffering circle after test execution completes
 
         # Once all tests are completed, plot the results
         self.plot_results(all_test_results)
