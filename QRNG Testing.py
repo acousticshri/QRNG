@@ -15,7 +15,7 @@ import time
 sys.set_int_max_str_digits(10025000)  # Adjust the value to your needs
 
 # Importing the NIST test functions
-sys.path.append('C:/Users/Rajat/Desktop/Project/Python Project/')
+sys.path.append('Python Project')
 from nist_test_framework import process_bit_sequence
 
 
@@ -102,8 +102,8 @@ class QRNG_GUI(tk.Tk):
         tk.Button(self.file_input_tab, text="Preview", command=self.run_preview).pack(pady=5)
 
         # Add the progress bar here
-        #self.progress.config(mode='indeterminate')  # Set indeterminate mode
-        #self.progress.pack(pady=10)  # Pack the progress bar with padding
+        self.progress.config(mode='indeterminate')  # Set indeterminate mode
+        self.progress.pack(pady=10)  # Pack the progress bar with padding
 
         self.preview_text = tk.Text(self.file_input_tab, height=30, width=90)
         self.preview_text.pack(pady=10)

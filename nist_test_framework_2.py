@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from tabulate import tabulate
 
 # Import individual tests
-sys.path.append('C:/Users/Rajat/Desktop/Project/Python Project/NIST-statistical-test-master/')
+sys.path.append('NIST-statistical-test-master')
 from monobit_test_01 import test as monobit_test
 from frequency_within_block_test_02 import test as frequency_block_test
 from runs_test_03 import test as runs_test
