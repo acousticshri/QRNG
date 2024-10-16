@@ -19,7 +19,7 @@ sys.path.append('Python Project')
 from nist_test_framework import process_bit_sequence
 
 
-def die_hard_test(numbers):
+def dieharder_test(numbers):
     p_value = 0.5  # Example placeholder value
     return p_value
 
