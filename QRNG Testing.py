@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
 import time
+from collections import Counter
 
 # Increase the limit for integer string conversion
 sys.set_int_max_str_digits(10025000)  # Adjust the value to your needs
@@ -29,16 +30,23 @@ def kolmogorov_smirnov_test(numbers):
     return d_statistic, p_value
 
 
-def entropy_test(numbers):
-    bits = ''.join(f'{int(num):b}' for num in numbers)
-    n = len(bits)
-    p_1 = bits.count('1') / n
-    p_0 = 1 - p_1
-    if p_0 > 0 and p_1 > 0:
-        entropy = - (p_0 * math.log2(p_0) + p_1 * math.log2(p_1))
-    else:
-        entropy = 0
-    return entropy
+# Importing the Shannon entropy function from the specified file
+import sys
+sys.path.append(r"C:\Users\Rajat\Desktop\Project\Python Project")
+import entropy_2  # Assuming entropy.py contains the Shannon entropy function
+
+from entropy_2 import shannon
+
+def shannon_entropy(numbers):
+    bit_sequence = ''.join(f'{int(num):b}' for num in numbers)
+    entropy_value = shannon(bit_sequence)
+    n = len(bit_sequence)
+    print(f"Entropy for this sequence: {entropy_value}")
+    p_value = entropy_2.calculate_p_value_from_entropy(entropy_value, n)
+    return p_value
+    return p_value
+
+
 
 
 def autocorrelation_test(numbers, lag=1):
@@ -53,7 +61,7 @@ def autocorrelation_test(numbers, lag=1):
 class QRNG_GUI(tk.Tk):
     def __init__(self):
         super().__init__()
-
+        self.file_add = []  # Initialize the file_add list to store file paths
         self.title("Quantum Random Number Generator GUI")
         self.geometry("1024x768")
 
@@ -78,8 +86,12 @@ class QRNG_GUI(tk.Tk):
         # Randomness Testing Tab
         self.testing_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.testing_tab, text="Randomness Testing")
-
         self.create_testing_tab()
+
+        # Extraction Tab
+        self.extraction_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.extraction_tab, text="Extraction")
+        self.create_extraction_tab()  # New extraction tab
 
         # Settings Tab
         self.settings_tab = ttk.Frame(self.notebook)
@@ -134,6 +146,7 @@ class QRNG_GUI(tk.Tk):
                     self.random_numbers_list.append(random_numbers)
                     self.filename.set(', '.join([file_path.split("/")[-1] for file_path in file_paths])) # Show the file name
                     self.file_names.append(file_path.split("/")[-1])  # Just store the file name, not the full path
+                    self.file_add.append(file_path)  # Store the full file path
 
                 messagebox.showinfo("Files Loaded", "Files loaded successfully!")
 
@@ -230,6 +243,11 @@ class QRNG_GUI(tk.Tk):
                         p_values[test_name] = p_value  # Store p-values with test names as keys
 
                     all_test_results[file_name] = p_values  # Store results for the file
+
+                elif test_name == "Shannon Entropy Test":
+                    p_value = shannon_entropy(random_numbers)
+                    result = f"Shannon Entropy Test for {file_name}:\nP-Value: {p_value:.4f}\n"
+                    self.result_text.insert(tk.END, result)
 
                 elif test_name == "Kolmogorov-Smirnov Test":
                     d_statistic, p_value = kolmogorov_smirnov_test(random_numbers)
@@ -345,6 +363,74 @@ class QRNG_GUI(tk.Tk):
         if save_path:
             fig.savefig(save_path)
             messagebox.showinfo("Success", f"Plot saved to {save_path}")
+
+
+# Create the extraction tab
+    def create_extraction_tab(self):
+        tk.Label(self.extraction_tab, text="Select an extraction method:").pack(pady=10)
+        self.selected_extraction = tk.StringVar()
+        extractions = ["Von Neumann Extraction", "Trevison Extraction"]  # Add more extraction methods if needed
+        self.selected_extraction.set(extractions[0])
+        tk.OptionMenu(self.extraction_tab, self.selected_extraction, *extractions).pack(pady=5)
+
+        tk.Button(self.extraction_tab, text="Run Extraction", command=self.run_extraction).pack(pady=10)
+        self.progress.pack(pady=10)
+
+        self.extraction_result_text = tk.Text(self.extraction_tab, height=30, width=90)
+        self.extraction_result_text.pack(pady=10)
+
+    # Implement the extraction methods
+    def run_extraction(self):
+        if not self.random_numbers_list:
+            messagebox.showerror("Error", "No files loaded! Please load files first.")
+            return
+
+        extraction_method = self.selected_extraction.get()
+        self.progress.start(10)  # Start the buffering circle
+        threading.Thread(target=self.execute_extraction, args=(extraction_method,)).start()
+
+    def execute_extraction(self, extraction_method):
+        try:
+            self.extraction_result_text.delete(1.0, tk.END)  # Clear previous results
+            result_text = f"Extraction Method: {extraction_method}\n"
+
+            for i, random_numbers in enumerate(self.random_numbers_list):
+                file_name = self.file_names[i]
+                result_text += f"Results for {file_name}:\n"
+                if extraction_method == "Von Neumann Extraction":
+                    result_text += self.von_neumann_extraction(random_numbers)
+                elif extraction_method == "Trevison Extraction":
+                    result_text += self.trevison_extraction(random_numbers)
+
+            self.extraction_result_text.insert(tk.END, result_text)
+            messagebox.showinfo("Extraction Complete", "Extraction process completed!")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error during extraction: {str(e)}")
+        finally:
+            self.progress.stop()  # Stop the buffering circle after extraction completes
+
+    # Example implementations of extraction methods (placeholders)
+    import sys
+    sys.path.append(r"C:\Users\Rajat\Desktop\Project\Python Project")
+    import Von_Neumann_Extraction_Method  # Assuming entropy.py contains the Shannon entropy function
+
+    from Von_Neumann_Extraction_Method import extract_and_process_bits
+
+    def von_neumann_extraction(self, numbers):
+        # Sample placeholder logic for Von Neumann Extraction
+        bit_sequence = ''.join(f'{int(num):b}' for num in numbers)
+        extract_and_process_bits(bit_sequence)
+        print(f"Length of bit list: {len(bit_list)}")
+        print(f"Length of extracted Von Neumann data: {len(result)}")
+        return
+
+    def trevison_extraction(self, numbers):
+        # Placeholder logic for Trevison Extraction
+        extracted_bits = [num % 2 for num in numbers]
+        return "Extracted Bits: " + ''.join(map(str, extracted_bits[:100])) + "\n\n"  # Show first 100 bits
+
+    # Other tabs, file loading, and preview functions go here (unchanged)...
 
 
 # Run the application
