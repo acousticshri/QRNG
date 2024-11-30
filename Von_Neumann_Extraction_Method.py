@@ -1,6 +1,6 @@
-def extract_and_process_bits(bit_sequence):
+def process_bits(bit_sequence):
     # Use the input bit sequence directly
-    bit_list = bit_sequence.replace('\n', '')  # Remove newline characters if any
+    bit_list = bit_sequence#.replace('\n', '')  # Remove newline characters if any
 
     # Print the length of the bit list
     print(f"Length of bit list: {len(bit_list)}")
@@ -32,3 +32,25 @@ def extract_and_process_bits(bit_sequence):
 
     # Return the processed Von Neumann data
     return result
+
+
+if __name__ == "__main__":
+    import os
+
+    # Get the file path from the user
+    file_path = input("Enter the path to the file containing the bit sequence: ")
+
+    # Check if the file exists
+    if not os.path.isfile(file_path):
+        print("Error: File not found. Please provide a valid file path.")
+    else:
+        # Read the file contents
+        with open(file_path, 'r') as file:
+            bit_sequence = file.read()
+
+        # Process the bits
+        extracted_data = process_bits(bit_sequence)
+
+        # Print the result
+        print("\nExtracted Von Neumann Data:")
+        #print(extracted_data)

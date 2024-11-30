@@ -1,59 +1,43 @@
 import subprocess
+import argparse
 
 
-def convert_bit_string_file_to_binary(input_file, output_file):
+def run_dieharder(input_file):
     """
-    Converts a file containing bit strings ('0's and '1's) to a binary file.
+    Runs the Dieharder command using WSL with the given input file.
 
-    Parameters:
-    input_file (str): Path to the input file containing bit strings (text file).
-    output_file (str): Path to the output binary file.
-    """
-    with open(input_file, 'r') as infile, open(output_file, 'wb') as outfile:
-        for line in infile:
-            # Remove any extra spaces or newlines
-            bit_string = line.strip()
-
-            # Convert bit string to an integer and then to bytes
-            byte_array = int(bit_string, 2).to_bytes((len(bit_string) + 7) // 8, byteorder='big')
-
-            # Write the byte array to the binary file
-            outfile.write(byte_array)
-
-
-def run_dieharder_on_binary_file(binary_file):
-    """
-    Runs the Dieharder test suite on a binary file containing random bits.
-
-    Parameters:
-    binary_file (str): Path to the binary file containing random bits.
+    Args:
+        input_file (str): Path to the input file.
 
     Returns:
-    str: Output from the Dieharder test suite.
+        str: Output of the Dieharder test or error message.
     """
+    # Dieharder command
+    command = f'wsl dieharder -a -f "{input_file}"'
+
     try:
-        # Run the dieharder test suite on the binary file
-        result = subprocess.run(['dieharder', '-a', '-g', '202', '-f', binary_file],
-                                capture_output=True, text=True)
+        # Run the command using subprocess
+        result = subprocess.run(command, shell=True, text=True, capture_output=True)
 
-        # Check if the subprocess ran successfully
         if result.returncode == 0:
-            return result.stdout
+            return result.stdout  # Command succeeded, return output
         else:
-            return f"Error running Dieharder: {result.stderr}"
-
+            return f"Error:\n{result.stderr}"  # Command failed, return error message
     except Exception as e:
-        return f"An error occurred: {str(e)}"
+        return f"Exception occurred: {str(e)}"
 
 
-# Example usage
-input_bit_string_file = 'C:/Users/Rajat/Desktop/Project/Python Project/data to test/Quantis_QRNG.txt'  # Path to the file containing bit strings
-output_binary_file = 'C:/Users/Rajat/Desktop/Project/Python Project/data to test/random_bits.bin'  # Path to the binary file to be created
+if __name__ == "__main__":
+    # Create an argument parser for the script
+    parser = argparse.ArgumentParser(description="Run Dieharder tests via WSL.")
+    parser.add_argument("input_file", help="Path to the input file for Dieharder.")
 
-# Convert the bit string file to binary
-convert_bit_string_file_to_binary(input_bit_string_file, output_binary_file)
+    # Parse arguments
+    args = parser.parse_args()
+    input_file = args.input_file
 
-# Run Dieharder on the resulting binary file
-output = run_dieharder_on_binary_file(output_binary_file)
-print(output)
-
+    # Run the Dieharder test
+    print("Running Dieharder test...")
+    output = run_dieharder(input_file)
+    print("Dieharder Test Output:")
+    print(output)

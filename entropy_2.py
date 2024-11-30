@@ -69,10 +69,10 @@ if __name__ == "__main__":
     if bit_sequence:
         # Calculate Shannon entropy
         entropy_value = shannon(bit_sequence)
-        print(f"Shannon Entropy: {entropy_value:.7f}")
+        print(f"Shannon Entropy: {entropy_value:.8f}")
 
         # Calculate p-value for randomness
         p_value = calculate_p_value_from_entropy(entropy_value, len(bit_sequence))
-        print(f"P-value for randomness: {p_value:.7f}")
+        print(f"P-value for randomness: {p_value:.8f}")
     else:
         print("Could not process the file.")
